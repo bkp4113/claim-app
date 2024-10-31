@@ -1,0 +1,9 @@
+fastapi[standard]==0.112.2
+SQLAlchemy==1.4.47
+psycopg2-binary==2.9.9
+uvicorn==0.32.0
+slowapi==0.1.9
+# Testing Dependecies
+pytest==8.2.2
+requests==2.32.3
+debugpy>=1.0,<2

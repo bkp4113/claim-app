@@ -1,0 +1,48 @@
+version: '1'
+services:
+  claim-process-ms:
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      # Claim process ms
+      - "8080:8080"
+      # Payment service ms
+      # - "8081:8081"
+      # Debugging
+      - "5678:5678"
+    environment:
+      ENVIRONMENT: dev
+      DATABASE_URL: "postgresql://test:test123!@postgres-db:5432/test"
+      DISABLE_SWAGGER: false
+    healthcheck:
+          test: curl --fail http://localhost:8080/health || exit 1
+          interval: 30s
+          timeout: 30s
+          retries: 3
+          start_period: 60s
+    # To be used with debugger
+    # entrypoint: [
+    #   "python3", "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", "-m", "uvicorn", "app.asgi:app", "--host", "0.0.0.0", "--port", "8080",
+    #     "--workers", "4", "--timeout-keep-alive", "300", "--timeout-graceful-shutdown", "120",
+    #     "--backlog", "2048"
+    # ]
+  postgres-db:
+    image: postgres:14-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: test123!
+      POSTGRES_USER: test
+      POSTGRES_DB: test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d test -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
